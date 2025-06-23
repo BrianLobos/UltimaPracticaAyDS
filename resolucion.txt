@@ -1,0 +1,40 @@
+1) El patron de arquitectura que sigue el proyecto es el patrón MVC.
+Esto se debe a que la vista (MainScreen.kt) consulta el estado del modelo a través del observer de SomeClass.kt, y tiene lógica para la presentación de los datos, por ejemplo:
+un onVuelo(pais: String, vuelos: MutableList<String>) {
+        val mensaje = "Vuelos sobre $pais"
+        val mensajeVuelos = buildString {
+            vuelos.forEachIndexed{index,vuelo ->
+                append("${index + 1}. $vuelo\n")//es un solo string con saltos de linea
+            }
+        }
+
+        //esto se ejecuta en la interfaz grafica
+        runOnUiThread {
+            findViewById<TextView>(R.id.textMensaje).text= mensaje
+            findViewById<TextView>(R.id.textVuelo).text = mensajeVuelos
+        }
+		
+Arma el mensaje "vuelos sobre pais", arma una lista de distintos vuelos hacia dicho país y lo muestra por pantalla.
+De estar implementado el patrón MVP, sería el presenter el encargado de armar los mensajes e indicarle a la vista que los muestre.
+
+SomeClass podría ser o bien un presenter o un controller, ya que su unica funcion es trabajar con el modelo, y no tiene tareas de control de vista ni de presentación.
+
+2) Violación a los principios SOLID:
+Responsabilidad Unica:
+	la función get de ApiY cumple 3 funciones:
+		-La conección con la api OpenSky
+		-Parseo del json que retorna la consulta a la API.
+		-El armado de la lista de vuelos a partir del json
+
+Segregación de dependencias:
+	onCreate en MainScreen depende de un modulo de bajo nivel:
+		dependency = SomeClass(this), está inicializando someClass, debería depender de una abstracción.
+
+Abierto y cerrado:
+	El repositorio tiene defindio de forma estática las coordenadas de los países, si algun día se agrega un nuevo país al sistema el repositorio se ve afectado, es decir esta abierto a modificación.
+	val paisCoordenadas = mapOf(
+        "Argentina" to BoundingBox(-55.0, -20.0, -75.0, -53.0),
+        "Chile" to BoundingBox(-56.0, -17.0, -75.0, -66.0),
+        "Brasil" to BoundingBox(-35.0, 5.0, -74.0, -35.0),
+        "Perú" to BoundingBox(-18.0, 1.0, -82.0, -68.0)
+    )

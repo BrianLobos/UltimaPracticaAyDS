@@ -1,16 +1,15 @@
-package C
+package com.example.parcialvuelosayd.data.external
 
-import com.example.parcialvuelosayd.A.BoundingBox
 import com.google.gson.Gson
 import com.google.gson.JsonObject
-import java.net.URL
 
-class ApiY {
-    fun get(pais: BoundingBox): MutableList<String> {
-        val url = "https://opensky-network.org/api/states/all?lamin=${pais.latMin}&lomin=${pais.lonMin}&lamax=${pais.latMax}&lomax=${pais.lonMax}"
-        val text = URL(url).readText()
-        print(text)
-        val jsonObject = Gson().fromJson(text, JsonObject::class.java)
+interface VuelosParser{
+    fun parseVuelos(json: String) : MutableList<String>
+}
+
+class VuelosParserImpl : VuelosParser{
+    override fun parseVuelos(json: String): MutableList<String> {
+        val jsonObject = Gson().fromJson(json, JsonObject::class.java)
         val states = jsonObject["states"].asJsonArray
         val vuelos = mutableListOf<String>()
         for (i in 0 until minOf(5,states.size())){
@@ -25,4 +24,5 @@ class ApiY {
         }
         return vuelos
     }
+
 }
